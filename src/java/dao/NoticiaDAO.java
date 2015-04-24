@@ -47,18 +47,12 @@ public class NoticiaDAO {
         try {
             Connection con;
             PreparedStatement ps;
-
-            String insert
-                    = new StringBuilder("INSERT INTO ").append(NOMBRE_TABLA)
-                    .append(" (")
-                    .append(TITULO).append(", ")
-                    .append(CONTENIDO).append(", ")
-                    .append(FECHA_PUBLICACION).append(", ")
-                    .append(ID_AUTOR).append(") VALUES (?, ?, ?, ?);")
-                    .toString();
+            String sql
+                    = new StringBuilder("INSERT INTO noticia (titulo, contenido, fecha_publicacion, id_autor)")
+                    .append(" VALUES (?, ?, ?, ?);").toString();
 
             con = dao.getConexion();
-            ps = con.prepareStatement(insert);
+            ps = con.prepareStatement(sql);
 
             ps.setString(1, noticia.getTitulo());
             ps.setString(2, noticia.getContenido());
@@ -73,31 +67,30 @@ public class NoticiaDAO {
         }
     }
 
-    public static List<Noticia> getNoticias() {
+    public static List<Noticia> buscarNoticias() {
         List<Noticia> listaNoticias = new ArrayList<>();
         Connection con;
         Statement stm;
         ResultSet rs;
-        String query
-                = new StringBuilder("SELECT * FROM ")
-                .append(NOMBRE_TABLA).toString();
+        String sql
+                = new StringBuilder("SELECT * FROM noticia;").toString();
         try {
             con = dao.getConexion();
             stm = con.createStatement();
-            rs = stm.executeQuery(query);
+            rs = stm.executeQuery(sql);
 
+            long id;
+            String titulo, contenido, autor;
+            Date fechaPublicacion;
             while (rs.next()) {
-                long id = rs.getLong(ID_NOTICIA);
-                String titulo = rs.getString(TITULO);
-                String contenido = rs.getString(CONTENIDO);
-                Date fechaPublicacion
-                        = (java.util.Date) rs.getDate(FECHA_PUBLICACION);
-                String autor = rs.getString(ID_AUTOR);
+                id = rs.getLong(ID_NOTICIA);
+                titulo = rs.getString(TITULO);
+                contenido = rs.getString(CONTENIDO);
+                fechaPublicacion = (Date) rs.getDate(FECHA_PUBLICACION);
+                autor = rs.getString(ID_AUTOR);
                 listaNoticias.add(
-                        new Noticia(id, titulo, contenido, fechaPublicacion,
-                                autor));
+                        new Noticia(id, titulo, contenido, fechaPublicacion, autor));
             }
-
             rs.close();
             stm.close();
             con.close();
@@ -109,23 +102,66 @@ public class NoticiaDAO {
     }
 
     public static void eliminarNoticia(long id) {
-        Connection con;
+        Connection con = dao.getConexion();
         PreparedStatement ps;
-        String stmt
-                = new StringBuilder("DELETE FROM ").append(NOMBRE_TABLA)
-                .append("  WHERE ").append(ID_NOTICIA)
-                .append(" = ?;").toString();
-        System.out.println(stmt);
-        con = dao.getConexion();
+        String sql = new StringBuilder("DELETE FROM noticia WHERE id_noticia = ?;").toString();
         try {
-            ps = con.prepareStatement(stmt);
-            ps.setInt(1, (int)id);
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, (int) id);
             ps.execute();
             ps.close();
             con.close();
         } catch (SQLException ex) {
             Logger.getLogger(NoticiaDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public static void actualizarNoticia(Noticia noticia) {
+        Connection con = dao.getConexion();
+        PreparedStatement ps;
+        String sql = new StringBuilder("UPDATE noticia SET titulo = ?, contenido = ?, id_autor = ?  WHERE id_noticia = ?;").toString();
+        try {
+            ps = con.prepareStatement(sql);
+            ps.setString(1, noticia.getTitulo());
+            ps.setString(2, noticia.getContenido());
+            ps.setString(3, noticia.getAutor());
+            ps.setLong(4, noticia.getId());
+            ps.execute();
+            ps.close();
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(NoticiaDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public static Noticia buscarPorId(long id) {
+        Noticia noticia = null;
+        Connection con = dao.getConexion();
+        PreparedStatement ps;
+        ResultSet rs;
+        String query = new StringBuilder("SELECT * FROM noticia WHERE noticia.id_noticia = ?;").toString();
+        try {
+            ps = con.prepareStatement(query);
+            ps.setLong(1, id);
+            rs = ps.executeQuery();
+
+            String titulo, contenido, autor;
+            Date fechaPublicacion;
+            while (rs.next()) {
+                titulo = rs.getString(TITULO);
+                contenido = rs.getString(CONTENIDO);
+                fechaPublicacion = (Date) rs.getDate(FECHA_PUBLICACION);
+                autor = rs.getString(ID_AUTOR);
+                noticia = new Noticia(id, titulo, contenido, fechaPublicacion, autor);
+            }
+            rs.close();
+            ps.close();
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(NoticiaDAO.class.getName())
+                    .log(Level.SEVERE, null, ex);
+        }
+        return noticia;
     }
 
     private String usuario;
@@ -144,15 +180,6 @@ public class NoticiaDAO {
         } catch (SQLException ex) {
             System.err.println(ex);
             return null;
-        }
-    }
-
-    private void cerrarConexion(Connection con) {
-        try {
-            con.close();
-        } catch (SQLException ex) {
-            System.err.println(ex.getMessage());
-            Logger.getLogger(NoticiaDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

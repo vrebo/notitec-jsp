@@ -34,36 +34,57 @@ public class Controlador extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        System.err.println(request.getServletPath());
         RequestDispatcher despachador = null;
+        Noticia noticia;
         switch (request.getServletPath()) {
-            case "/IniciarSesion.do":
+            case "/IniciarSesion":
                 String usuario = request.getParameter("usuario");
                 String contraseña = request.getParameter("contrasenia");
-                System.out.println("usuario = " + usuario);
-                System.out.println("contraseña = " + contraseña);
-                despachador = request.getRequestDispatcher("/MuestraNoticias.do");
+//                System.out.println("usuario = " + usuario);
+//                System.out.println("contraseña = " + contraseña);
+                despachador = request.getRequestDispatcher("/MuestraNoticias");
                 break;
-            case "/RegistraNoticia.do":
+            case "/RegistraNoticia": {
                 String titulo = request.getParameter("titulo");
                 String autor = request.getParameter("autor");
                 String contenido = request.getParameter("contenido");
-                Noticia noticia = new Noticia(titulo, contenido, new Date(), autor);
+                System.out.println("contenido = " + contenido);
+                noticia = new Noticia(titulo, contenido, new Date(), autor);
                 NoticiaDAO.altaNoticia(noticia);
-                despachador = request.getRequestDispatcher("/MuestraNoticias.do");
-                break;
-            case "/MuestraNoticias.do":
-                List<Noticia> listaNoticias = NoticiaDAO.getNoticias();
-                System.out.println(listaNoticias.size());
+                despachador = request.getRequestDispatcher("/MuestraNoticias");
+            }
+            break;
+            case "/MuestraNoticias":
+                List<Noticia> listaNoticias = NoticiaDAO.buscarNoticias();
                 request.setAttribute("listaNoticias", listaNoticias);
-                despachador = request.getRequestDispatcher("/jsp/noticias.jsp");
+                despachador = request.getRequestDispatcher("/WEB-INF/vistas/noticias.jsp");
                 break;
-            case "/EliminarNoticia.do":
-                System.out.println("Eliminando noticia");
+            case "/EliminarNoticia":
                 long id = Long.parseLong(request.getParameter("id_noticia"));
                 NoticiaDAO.eliminarNoticia(id);
-                despachador = request.getRequestDispatcher("/MuestraNoticias.do");
+                despachador = request.getRequestDispatcher("/MuestraNoticias");
                 break;
+            case "/AltaNoticia":
+                despachador = request.getRequestDispatcher("/WEB-INF/vistas/form_alta.jsp");
+                break;
+            case "/EditarNoticia": {
+                long idNoticia = Long.parseLong(request.getParameter("id_noticia"));
+                noticia = NoticiaDAO.buscarPorId(idNoticia);
+                System.out.println("buscando noticia idNoticia = " + idNoticia);
+                request.setAttribute("noticia", noticia);
+                despachador = request.getRequestDispatcher("/WEB-INF/vistas/form_edicion.jsp");
+            }
+            break;
+            case "/SalvarNoticia": {
+                long idNoticia = Long.parseLong(request.getParameter("id_noticia"));
+                String titulo = request.getParameter("titulo");
+                String autor = request.getParameter("autor");
+                String contenido = request.getParameter("contenido");
+                noticia = new Noticia(idNoticia, titulo, contenido, new Date(), autor);
+                NoticiaDAO.actualizarNoticia(noticia);
+                despachador = request.getRequestDispatcher("/MuestraNoticias");
+            }
+            break;
         }
         despachador.forward(request, response);
     }

@@ -6,23 +6,46 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>Controlador</servlet-name>
-        <url-pattern>/EliminarNoticia.do</url-pattern>
+        <url-pattern>/EliminarNoticia</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Controlador</servlet-name>
-        <url-pattern>/RegistraNoticia.do</url-pattern>
+        <url-pattern>/RegistraNoticia</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Controlador</servlet-name>
-        <url-pattern>/MuestraNoticias.do</url-pattern>
+        <url-pattern>/MuestraNoticias</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Controlador</servlet-name>
-        <url-pattern>/IniciarSesion.do</url-pattern>
+        <url-pattern>/IniciarSesion</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Controlador</servlet-name>
+        <url-pattern>/AltaNoticia</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Controlador</servlet-name>
+        <url-pattern>/EditarNoticia</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Controlador</servlet-name>
+        <url-pattern>/SalvarNoticia</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
             30
         </session-timeout>
     </session-config>
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+    <jsp-config>
+        <jsp-property-group>
+            <description/>
+            <url-pattern>/WEB-INF/vista/*</url-pattern>
+            <include-prelude>/WEB-INF/jspf/header.jspf</include-prelude>
+            <!--<include-coda>/WEB-INF/jspf/footer.jspf</include-coda>-->
+        </jsp-property-group>
+    </jsp-config>
 </web-app>
